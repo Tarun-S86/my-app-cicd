@@ -4,81 +4,62 @@ pipeline {
   stages {
     stage('1. Checkout') {
       steps {
-        // Pulls your code from the branch being built
         checkout scm
       }
     }
 
     stage('2. Build') {
       steps {
-        echo 'Building…'
-        // e.g. for Java/Maven:
-        // sh 'mvn clean package'
-        // or for Node.js:
-        // sh 'npm install && npm run build'
+        echo '⏳ Building…'
+        // e.g. sh 'npm install && npm run build'
       }
     }
 
     stage('3. Unit & Integration Tests') {
       steps {
-        echo 'Running tests…'
-        // sh 'mvn test'
-        // or: sh 'npm test'
+        echo '🧪 Running tests…'
+        // e.g. sh 'npm test'
       }
       post {
         always {
-          // Archives JUnit XML reports
-          junit '**/target/surefire-reports/*.xml'
+          // allowEmptyResults avoids failure if there are no XML reports
+          junit allowEmptyResults: true, testResults: '**/target/surefire-reports/*.xml'
         }
       }
     }
 
     stage('4. Static Code Analysis') {
       steps {
-        echo 'Static analysis…'
-        // withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-        //   sh "sonar-scanner \
-        //       -Dsonar.host.url=$SONAR_HOST_URL \
-        //       -Dsonar.login=$SONAR_TOKEN"
-        // }
+        echo '🔍 Static analysis…'
+        // e.g. withCredentials([...]) { sh 'sonar-scanner …' }
       }
     }
 
     stage('5. Security Scan') {
       steps {
-        echo 'Security scan…'
-        // e.g. OWASP Dependency-Check:
-        // sh 'dependency-check --project my-app --scan .'
-        // or for Node:
-        // sh 'npm audit --audit-level=high'
+        echo '🔒 Security scan…'
+        // e.g. sh 'npm audit --audit-level=high'
       }
     }
 
     stage('6. Deploy to Staging') {
       steps {
-        echo 'Deploying to staging…'
-        // sh 'docker build -t my-app:${GIT_COMMIT} .'
-        // sh 'docker push myregistry/my-app:${GIT_COMMIT}'
-        // then invoke your staging rollout (kubectl, Ansible, etc.)
+        echo '🚀 Deploying to staging…'
+        // e.g. sh 'docker build -t my-app:${GIT_COMMIT} .'
       }
     }
 
     stage('7. Integration Tests on Staging') {
       steps {
-        echo 'Running staging integration tests…'
-        // sh 'newman run tests/staging-collection.json'
+        echo '🔗 Running staging integration tests…'
+        // e.g. sh 'newman run tests/staging-collection.json'
       }
     }
   }
 
   post {
     success {
-      echo 'Pipeline completed successfully!'
-    }
-    failure {
-      mail to: 'dev-team@example.com',
-           subject: "Build failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-           body: "Check the console output at ${env.BUILD_URL}"
+      echo '✅ Pipeline completed successfully!'
     }
   }
 }
